@@ -196,21 +196,6 @@
             <br>
             <input type="submit" value="Add Employee" id="addEmployeeButton" style="padding: 15px 30px; font-size: 30px;">
         </form>
-        <!-- Button click handler to toggle the form visibility -->
-        <script>
-            const minimizeButton = document.getElementById('minimizeButton');
-            const employeeForm = document.getElementById('employeeForm');
-
-            minimizeButton.addEventListener('click', () => {
-                if (employeeForm.style.display === 'none' || employeeForm.style.display === '') {
-                    employeeForm.style.display = 'block';
-                    minimizeButton.textContent = 'Minimize';
-                } else {
-                    employeeForm.style.display = 'none';
-                    minimizeButton.textContent = 'Expand';
-                }
-            });
-        </script>
     </div>
 
     <!-- Schedule table -->
@@ -243,6 +228,8 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', loadSchedule);
+
         const scheduleTable = document.querySelector('.schedule table');
         const addEmployeeButton = document.getElementById('addEmployeeButton');
         const colorPickerDialog = document.getElementById('colorPickerDialog');
@@ -254,8 +241,25 @@
             if (targetCell.classList.contains('time-cell')) {
                 selectedCell = targetCell;
                 showColorPickerDialog();
+                saveSchedule();
             }
         });
+
+        <!-- Button click handler to toggle the form visibility -->
+            const minimizeButton = document.getElementById('minimizeButton');
+            const employeeForm = document.getElementById('employeeForm');
+
+            minimizeButton.addEventListener('click', () => {
+                if (employeeForm.style.display === 'none' || employeeForm.style.display === '') {
+                    employeeForm.style.display = 'block';
+                    minimizeButton.textContent = 'Minimize';
+                } else {
+                    employeeForm.style.display = 'none';
+                    minimizeButton.textContent = 'Expand';
+                }
+                saveSchedule();
+            });
+
 
         // Add event listeners to color picker options
 const colorPickerOptions = document.querySelectorAll('.color-picker-option');
@@ -278,6 +282,7 @@ colorPickerOptions.forEach((option) => {
         }
 
         hideColorPickerDialog();
+        saveSchedule();
     });
 });
 
@@ -353,12 +358,13 @@ function rgbToHex(rgb) {
         // Prevent form submission when clicking "Add Employee"
         addEmployeeButton.addEventListener('click', (e) => {
             e.preventDefault();
+            saveSchedule();
         });
 
         // Add employee when the form is submitted
         addEmployeeButton.addEventListener('click', () => {
             hideColorPickerDialog(); // Hide the color picker dialog when adding an employee
-
+saveSchedule();
             // Create a new row for the employee in the schedule table
             const employeeName = document.getElementById('employeeName').value;
             const newRow = scheduleTable.insertRow(-1);
@@ -410,10 +416,49 @@ deleteButton.style.padding = '40px 20px'; // Adjust padding to make the button l
 deleteButton.style.fontSize = '25px'; // Adjust font size to make the text larger
 deleteButton.addEventListener('click', () => {
     scheduleTable.deleteRow(newRow.rowIndex);
+    saveSchedule();
 });
 deleteCell.appendChild(deleteButton);
 
         });
+
+        function saveSchedule() {
+    const employeeRows = document.querySelectorAll('.employee-row');
+    const savedData = [];
+
+    employeeRows.forEach(row => {
+        const nameCell = row.querySelector('td');
+        const timeCells = row.querySelectorAll('.time-cell');
+        const timeData = [];
+
+        timeCells.forEach(cell => {
+            timeData.push({
+                bgColor: cell.style.backgroundColor,
+                textColor: cell.style.color,
+                text: cell.textContent
+            });
+        });
+
+        savedData.push({
+            name: nameCell.textContent,
+            timeData: timeData
+        });
+    });
+
+    localStorage.setItem('scheduleData', JSON.stringify(savedData));
+}
+         function loadSchedule() {
+    const savedData = JSON.parse(localStorage.getItem('scheduleData'));
+    if (savedData) {
+        savedData.forEach(employeeData => {
+            // Reconstruct the employee row based on the saved data
+            // This will involve creating a new row, setting the name,
+            // and iterating over the `timeData` array to restore each cell.
+        });
+    }
+}
+
+
     </script>
 </body>
 </html>
